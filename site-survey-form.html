@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mashworth Services — Site Survey Form</title>
+  <!-- Flatpickr date picker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr" onerror="window.flatpickr=function(){return{clear:function(){},destroy:function(){}}};"></script>
+  <style>
+    /* ============================================================
+       BRAND TOKENS
+    ============================================================ */
+    :root {
+      --navy  : #063362;
+      --navy2 : #042a54;
+      --navy3 : #063362;
+      --orange: #e8401c;
+      --orng2 : #c73516;
+      --white : #ffffff;
+      --border: rgba(232,64,28,0.40);
+      --radius: 10px;
+      --step-dot: 34px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #063362;
+      color: var(--white);
+      min-height: 100vh;
+      padding: 16px 10px 60px;
+    }
+
+    /* ============================================================
+       OUTER SHELL
+    ============================================================ */
+    .form-shell {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--navy3);
+      border-radius: 18px;
+      border: 1.5px solid rgba(232,64,28,0.20);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.40);
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .form-header {
+      background: var(--navy2);
+      padding: 26px 32px 22px;
+      border-bottom: 2px solid var(--orange);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-header img.logo {
+      height: 56px;
+      width: auto;
+      object-fit: contain;
+    }
+    .form-header p {
+      font-size: 0.80rem;
+      color: rgba(255,255,255,0.48);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       STEP PROGRESS BAR
+    ============================================================ */
+    .step-progress {
+      background: var(--navy2);
+      padding: 20px 28px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* Track labels row */
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .step-label {
+      font-size: 0.60rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: rgba(255,255,255,0.30);
+      text-align: center;
+      flex: 1;
+      transition: color 0.3s;
+    }
+    .step-label.active  { color: var(--orange); }
+    .step-label.done    { color: rgba(255,255,255,0.55); }
+
+    /* Dot + line track */
+    .step-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .step-dot {
+      width: var(--step-dot);
+      height: var(--step-dot);
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: var(--navy2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      flex-shrink: 0;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+    .step-dot.active {
+      border-color: var(--orange);
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(232,64,28,0.22);
+    }
+    .step-dot.done {
+      border-color: rgba(232,64,28,0.6);
+      background: rgba(232,64,28,0.18);
+      color: var(--orange);
+    }
+    .step-dot.done::after {
+      content: "✓";
+      position: absolute;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+    .step-dot.done span { display: none; }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: rgba(255,255,255,0.10);
+      position: relative;
+    }
+    .step-line .fill {
+      height: 100%;
+      background: var(--orange);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ============================================================
+       STEP COUNTER TEXT
+    ============================================================ */
+    .step-counter {
+      padding: 18px 32px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .step-counter .current {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--orange);
+    }
+    .step-counter .total {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.38);
+    }
+    .step-counter .step-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-left: 6px;
+    }
+
+    /* ============================================================
+       STEPS CONTAINER
+    ============================================================ */
+    .steps-wrap {
+      padding: 24px 32px 20px;
+    }
+
+    .step-panel {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+    .step-panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       FIELD GROUPS
+    ============================================================ */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 18px;
+    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 7px;
+      letter-spacing: 0.15px;
+    }
+    label .req { color: #ff6b47; margin-left: 3px; }
+    label .hint {
+      display: block;
+      font-weight: 400;
+      color: rgba(255,255,255,0.38);
+      font-size: 0.73rem;
+      margin-top: 2px;
+      letter-spacing: 0;
+    }
+
+    /* ============================================================
+       INPUTS
+    ============================================================ */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 15px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.92rem;
+      color: #1a1a2e;
+      background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input::placeholder, textarea::placeholder { color: #9aa5b8; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(232,64,28,0.16);
+    }
+    input.error, select.error, textarea.error {
+      border-color: #e53e3e;
+      box-shadow: 0 0 0 3px rgba(229,62,62,0.12);
+    }
+    input[type="date"] { color: #1a1a2e; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e8401c' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 12px;
+      padding-right: 38px;
+      cursor: pointer;
+    }
+    textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+
+    /* Flatpickr calendar theming */
+    .flatpickr-calendar {
+      background: #0d2147 !important;
+      border: 1.5px solid rgba(232,64,28,0.40) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45) !important;
+      font-family: 'Segoe UI', Arial, sans-serif !important;
+    }
+    .flatpickr-months .flatpickr-month,
+    .flatpickr-weekdays,
+    span.flatpickr-weekday {
+      background: #091730 !important;
+      color: rgba(255,255,255,0.60) !important;
+      font-weight: 700 !important;
+      font-size: 0.78rem !important;
+    }
+    .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-months .flatpickr-next-month {
+      fill: #e8401c !important;
+    }
+    .flatpickr-months .flatpickr-prev-month:hover svg,
+    .flatpickr-months .flatpickr-next-month:hover svg { fill: #fff !important; }
+    .flatpickr-current-month .flatpickr-monthDropdown-months,
+    .flatpickr-current-month input.cur-year {
+      color: #fff !important;
+      font-weight: 700 !important;
+      background: transparent !important;
+    }
+    .flatpickr-day {
+      color: rgba(255,255,255,0.75) !important;
+      border-radius: 8px !important;
+    }
+    .flatpickr-day:hover {
+      background: rgba(232,64,28,0.22) !important;
+      border-color: transparent !important;
+    }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+      background: var(--orange) !important;
+      border-color: var(--orange) !important;
+      color: #fff !important;
+    }
+
+    /* Buttons */
+    .step-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    button {
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: all 0.22s;
+      border-radius: 50px;
+      padding: 0 28px;
+      height: 48px;
+      font-size: 0.94rem;
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-prev {
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.30);
+      color: rgba(255,255,255,0.70);
+      max-width: 130px;
+    }
+    .btn-prev:hover {
+      border-color: var(--white);
+      color: var(--white);
+      background: rgba(255,255,255,0.06);
+    }
+    .btn-next, .btn-submit {
+      background: linear-gradient(135deg, var(--orange), var(--orng2));
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(232,64,28,0.35);
+      flex: 2;
+    }
+    .btn-next:hover, .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(232,64,28,0.45);
+    }
+    .btn-next:active, .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+
+    /* New component classes for Site Survey Form */
+    .radio-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1.5px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .radio-card:hover { border-color: var(--orange); background: rgba(232,64,28,0.07); }
+    .radio-card.checked { border-color: var(--orange); background: rgba(232,64,28,0.13); }
+    .radio-card input[type="radio"] {
+      width: 18px; height: 18px;
+      accent-color: var(--orange);
+      margin: 0;
+      cursor: pointer;
+    }
+    .radio-card-label { font-size: 0.9rem; color: #fff; font-weight: 500; }
+
+    .reason-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .reason-chip {
+      padding: 6px 12px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .reason-chip:hover { border-color: var(--orange); color: #fff; }
+    .reason-chip.selected {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+      font-weight: 700;
+    }
+    .inline-conditional {
+      display: none;
+      margin-top: 10px;
+      padding-left: 10px;
+      border-left: 2px solid rgba(232,64,28,0.3);
+      animation: fadeIn 0.2s ease;
+    }
+    .inline-conditional.visible { display: block; }
+
+    .upload-zone {
+      border: 1.5px dashed rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+    }
+    .upload-label { font-size: 0.75rem; color: var(--orange); font-weight: 700; margin-bottom: 4px; display:block; text-transform:uppercase; }
+
+    /* Review Styles */
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .review-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .review-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .review-val {
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       ELITE CONNECTOR FOOTER
+    ============================================================ */
+    .ec-footer {
+      text-align: center;
+      padding: 18px 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin-top: 4px;
+    }
+    .ec-footer a { display: inline-block; line-height: 0; }
+    .ec-footer .powered-by-text {
+      font-size: 0.70rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 0px;
+      margin-bottom: 0;
+    }
+    .ec-footer img {
+      height: 88px;
+      width: auto;
+      object-fit: contain;
+      opacity: 0.70;
+      transition: opacity 0.2s;
+    }
+    .ec-footer img:hover { opacity: 1; }
+    @media print { .ec-footer { display: none !important; } }
+
+    /* Logo fallback text */
+    .logo-fallback-text {
+      display: none;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: 0.5px;
+    }
+    .ec-logo-fallback-text {
+      display: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.75);
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-shell">
+  <!-- Header -->
+  <header class="form-header">
+    <img
+      class="logo"
+      src="https://storage.googleapis.com/highlevel-backend.appspot.com/location/BINHN67zcmmPlBACGLVK/form/hMuohaPigmvgQWiRptP0/91ddecbf-011d-4c99-8c80-a84f68039040.svg"
+      alt="Mashworth Services"
+      loading="eager"
+      decoding="async"
+      onerror="this.style.display='none';this.closest('.form-header').querySelector('.logo-fallback-text').style.display='block';"
+    />
+    <span class="logo-fallback-text">Mashworth Services</span>
+    <p>Electrical Site Survey &amp; Scoping Form</p>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="step-progress">
+    <div class="step-labels">
+      <div class="step-label active">Start</div>
+      <div class="step-label">Prop</div>
+      <div class="step-label">Details</div>
+      <div class="step-label">System</div>
+      <div class="step-label">Scope</div>
+      <div class="step-label">Finish</div>
+    </div>
+    <div class="step-track">
+      <div class="step-dot active">1</div>
+      <div class="step-line"><div class="fill"></div></div>
+      <div class="step-dot">2</div>
+      <div class="step-line"><div class="fill"></div></div>
+      <div class="step-dot">3</div>
+      <div class="step-line"><div class="fill"></div></div>
+      <div class="step-dot">4</div>
+      <div class="step-line"><div class="fill"></div></div>
+      <div class="step-dot">5</div>
+    </div>
+  </div>
+
+  <!-- Step Counter -->
+  <div class="step-counter">
+    <span class="current">Step 1</span>
+    <span class="total">of ?</span>
+    <span class="step-name">Basics</span>
+  </div>
+
+  <!-- Form Body -->
+  <form id="surveyForm" class="steps-wrap" onsubmit="event.preventDefault();">
+    
+    <!-- STEP 1: Job & Client Basics -->
+    <div id="step-1" class="step-panel active" data-step-name="Basics">
+      <div class="row-2">
+        <div class="field-group">
+          <label>Survey Date <span class="req">*</span></label>
+          <input type="date" id="surveyDate" required placeholder="Select date...">
+        </div>
+        <div class="field-group">
+          <label>Engineer Name</label>
+          <input type="text" id="engineerName" placeholder="Who is adjusting this?">
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field-group">
+          <label>Client Name <span class="req">*</span></label>
+          <input type="text" id="clientName" required placeholder="Full Name">
+        </div>
+        <div class="field-group">
+          <label>Phone <span class="req">*</span></label>
+          <input type="tel" id="clientPhone" required placeholder="07XXX XXXXXX">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="clientEmail" required placeholder="client@example.com">
+      </div>
+
+      <div class="field-group">
+        <label>Site Address <span class="req">*</span></label>
+        <textarea id="siteAddress" rows="2" required placeholder="Street, Town, Postcode"></textarea>
+      </div>
+
+      <div class="row-2">
+        <div class="field-group">
+          <label>Occupancy Type</label>
+          <select id="occupancyType">
+            <option value="">Select...</option>
+            <option value="Owner-occupied">Owner-occupied</option>
+            <option value="Tenanted">Tenanted</option>
+            <option value="Landlord-Agent">Landlord/Agent (Vacant)</option>
+            <option value="Commercial">Commercial</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Occupied during works?</label>
+          <select id="occupiedDuringWorks">
+            <option value="No">No (Vacant)</option>
+            <option value="Yes">Yes</option>
+            <option value="Partially">Partially</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Primary Reason for Survey <span class="req">*</span></label>
+        <div class="reason-grid" id="reasonGrid">
+          <!-- Populated by JS -->
+          <div class="reason-chip" onclick="toggleReason(this, 'Rewire quote')">Rewire quote</div>
+          <div class="reason-chip" onclick="toggleReason(this, 'Consumer unit upgrade')">Consumer unit upgrade</div>
+          <div class="reason-chip" onclick="toggleReason(this, 'Lighting redesign')">Lighting redesign</div>
+          <div class="reason-chip" onclick="toggleReason(this, 'EICR')">EICR</div>
+          <div class="reason-chip" onclick="toggleReason(this, 'Fault investigation')">Fault investigation</div>
+          <div class="reason-chip" onclick="toggleReason(this, 'Extension-renovation')">Extension/Renovation</div>
+          <div class="reason-chip" onclick="toggleReason(this, 'Other')">Other</div>
+        </div>
+        <input type="hidden" id="surveyReasons">
+      </div>
+
+      <div class="step-actions">
+        <!-- Placeholder for symmetry -->
+        <div></div> 
+        <button class="btn-next" onclick="nextStep()">Next Step &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Property Type (Routing Trigger) -->
+    <div id="step-2" class="step-panel" data-step-name="Property Type">
+      <div class="field-group">
+        <label>Select Property Type <span class="req">*</span></label>
+        <!-- Custom Radio Cards for better UI -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label class="radio-card">
+            <input type="radio" name="propType" value="Flat-apartment">
+            <span class="radio-card-label">Flat / Apartment</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="propType" value="Terrace (mid)">
+            <span class="radio-card-label">Terrace (Mid)</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="propType" value="Terrace (end)">
+            <span class="radio-card-label">Terrace (End) / Semi-Detached</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="propType" value="Detached">
+            <span class="radio-card-label">Detached</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="propType" value="Bungalow">
+            <span class="radio-card-label">Bungalow</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="propType" value="HMO-multi-let">
+            <span class="radio-card-label">HMO / Multi-let</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="propType" value="Commercial unit">
+            <span class="radio-card-label">Commercial Unit</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3A: Flat / Apartment -->
+    <div id="step-3a" class="step-panel" data-step-name="Flat Details">
+      <div class="row-2">
+        <div class="field-group">
+          <label>Floor Level</label>
+          <select id="flatFloorWrapper">
+            <option value="Ground">Ground</option>
+            <option value="Basement">Basement</option>
+            <option value="Mid">Mid Floor</option>
+            <option value="Top">Top Floor</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Access</label>
+          <select id="flatAccess">
+            <option value="Stairs only">Stairs only</option>
+            <option value="Lift">Lift</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="row-2">
+        <div class="field-group">
+          <label>Meter Location</label>
+          <select id="flatMeterLoc">
+            <option value="Inside flat">Inside flat</option>
+            <option value="Communal cupboard">Communal cupboard</option>
+            <option value="External">External</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>CU Location</label>
+          <select id="flatCULoc">
+            <option value="Inside flat">Inside flat</option>
+            <option value="Communal">Communal</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Landlord Restrictions?</label>
+        <select id="flatLandlordRestr">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Drilling/Chasing Restrictions?</label>
+        <select id="flatDrillRestr" onchange="toggleInline('flatDrillNote', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="flatDrillNote" class="inline-conditional">
+          <label>Details:</label>
+          <input type="text" id="flatDrillDetails" placeholder="e.g. Concrete ceilings, no chasing allowed">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Parking/Loading Constraints?</label>
+        <select id="flatParkingRestr" onchange="toggleInline('flatParkingNote', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="flatParkingNote" class="inline-conditional">
+          <label>Details:</label>
+          <input type="text" id="flatParkingDetails" placeholder="e.g. Permit only, loading bay 9-5">
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3B: Houses (Terrace, Semi, Detached, Bungalow) -->
+    <div id="step-3b" class="step-panel" data-step-name="House Details">
+      <div class="row-2">
+        <div class="field-group">
+          <label>Approx. Age</label>
+          <select id="houseAge">
+            <option value="pre-1930">Pre-1930</option>
+            <option value="1930-1970">1930 - 1970</option>
+            <option value="1970-2000">1970 - 2000</option>
+            <option value="2000+">2000+</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Storeys</label>
+          <select id="houseStoreys">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3+">3+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Loft Access Available?</label>
+        <select id="houseLoftAccess" onchange="toggleInline('houseLoftBoardedWrapper', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="houseLoftBoardedWrapper" class="inline-conditional">
+          <label>Is the loft boarded?</label>
+          <select id="houseLoftBoarded">
+            <option value="No">No / Partial</option>
+            <option value="Yes">Yes (Fully)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Attached Garage/Outbuilding?</label>
+        <select id="houseOutbuilding" onchange="toggleInline('houseOutPowerWrapper', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="houseOutPowerWrapper" class="inline-conditional">
+          <label>Power required there?</label>
+          <select id="houseOutPowerReq" onchange="toggleInline('houseOutPowerNote', this.value === 'Yes')">
+             <option value="No">No</option>
+             <option value="Yes">Yes</option>
+          </select>
+          <div id="houseOutPowerNote" class="inline-conditional">
+            <input type="text" id="houseOutPowerDetails" placeholder="Description of power needs">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Recent Renovation Areas?</label>
+        <select id="houseReno" onchange="toggleInline('houseRenoNote', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="houseRenoNote" class="inline-conditional">
+          <label>Areas to protect:</label>
+          <input type="text" id="houseRenoDetails" placeholder="e.g. Newly painted Hallway">
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3C: HMO -->
+    <div id="step-3c" class="step-panel" data-step-name="HMO Details">
+      <div class="field-group">
+        <label>Number of Letting Rooms</label>
+        <input type="number" id="hmoRooms" min="1" placeholder="e.g. 5">
+      </div>
+
+      <div class="field-group">
+        <label>Fire Alarm System Present?</label>
+        <select id="hmoFire" onchange="toggleInline('hmoFireDetails', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+          <option value="Unknown">Unknown</option>
+        </select>
+        <div id="hmoFireDetails" class="inline-conditional">
+          <label>Grade/Type:</label>
+          <input type="text" id="hmoFireType" placeholder="e.g. Grade A, Panel system">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Emergency Lighting Present?</label>
+        <select id="hmoEmLight">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Existing EICR Available?</label>
+        <select id="hmoEicr">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Access to all rooms today?</label>
+        <select id="hmoAccess" onchange="toggleInline('hmoAccessIssues', this.value === 'No')">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+        <div id="hmoAccessIssues" class="inline-conditional">
+          <label>Rooms NOT accessed:</label>
+          <textarea id="hmoNoAccessRooms" rows="2" placeholder="List rooms..."></textarea>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3D: Commercial -->
+    <div id="step-3d" class="step-panel" data-step-name="Commercial Details">
+      <div class="field-group">
+        <label>Business Type</label>
+        <select id="commType">
+          <option value="Office">Office</option>
+          <option value="Retail">Retail</option>
+          <option value="Industrial">Industrial</option>
+          <option value="Hospitality">Hospitality</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="row-2">
+         <div class="field-group">
+           <label>Operating Hours</label>
+           <input type="text" id="commHours" placeholder="e.g. 9am - 5pm">
+         </div>
+         <div class="field-group">
+           <label>Out-of-hours works?</label>
+           <select id="commOOH">
+             <option value="No">No</option>
+             <option value="Yes">Yes</option>
+           </select>
+         </div>
+      </div>
+
+      <div class="field-group">
+        <label>3-Phase Supply Present?</label>
+        <select id="comm3Phase" onchange="toggleInline('comm3PhaseDetails', this.value === 'Yes')">
+          <option value="Unknown">Unknown</option>
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="comm3PhaseDetails" class="inline-conditional">
+           <label>Main Switch Rating:</label>
+           <input type="text" id="commMainSwitch" placeholder="e.g. 100A TPN">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Critical Loads</label>
+        <div class="reason-grid">
+          <div class="reason-chip" onclick="toggleSelection(this, 'commLoads')">Servers</div>
+          <div class="reason-chip" onclick="toggleSelection(this, 'commLoads')">Refrigeration</div>
+          <div class="reason-chip" onclick="toggleSelection(this, 'commLoads')">Alarms</div>
+          <div class="reason-chip" onclick="toggleSelection(this, 'commLoads')">Machinery</div>
+        </div>
+        <input type="hidden" id="commLoads">
+      </div>
+
+      <div class="field-group">
+        <label>Compliance Docs Required</label>
+        <div class="reason-grid">
+          <div class="reason-chip" onclick="toggleSelection(this, 'commDocs')">EIC</div>
+          <div class="reason-chip" onclick="toggleSelection(this, 'commDocs')">Minor Works</div>
+          <div class="reason-chip" onclick="toggleSelection(this, 'commDocs')">EICR</div>
+          <div class="reason-chip" onclick="toggleSelection(this, 'commDocs')">Test Results Pack</div>
+        </div>
+        <input type="hidden" id="commDocs">
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Electrical Intake & Safety -->
+    <div id="step-4" class="step-panel" data-step-name="Intake &amp; Safety">
+      <div class="row-2">
+        <div class="field-group">
+          <label>Supply Type</label>
+          <select id="elecSupplyType">
+            <option value="Single-phase">Single-phase</option>
+            <option value="Three-phase">Three-phase</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Earthing Arrangement</label>
+          <select id="elecEarthing">
+            <option value="TN-S">TN-S (Lead)</option>
+            <option value="TN-C-S">TN-C-S (PME)</option>
+            <option value="TT">TT (Earth Rod)</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Main Bonding Present (Gas/Water)?</label>
+        <select id="elecBonding" onchange="toggleInline('elecBondingIssues', this.value === 'No' || this.value === 'Unsure')">
+          <option value="Yes">Yes - Correctly Sized</option>
+          <option value="No">No</option>
+          <option value="Unsure">Unsure</option>
+        </select>
+        <div id="elecBondingIssues" class="inline-conditional">
+          <label>Notes:</label>
+          <textarea id="elecBondingNotes" rows="2" placeholder="Missing? Undersized?"></textarea>
+          <div class="upload-zone">
+            <span class="upload-label">Required: Bonding Photo</span>
+            <input type="file" id="fileBonding" accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Meter Tails Condition</label>
+        <select id="elecTails" onchange="toggleInline('elecTailsIssues', this.value === 'Concerns')">
+          <option value="Good">Good</option>
+          <option value="Concerns">Concerns</option>
+        </select>
+        <div id="elecTailsIssues" class="inline-conditional">
+          <label>Note &amp; Photo:</label>
+          <input type="text" id="elecTailsNote" placeholder="Issue details...">
+          <div class="upload-zone">
+            <input type="file" id="fileTails" accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Signs of Overheating at CU/DB?</label>
+        <select id="elecOverheat" onchange="toggleInline('elecOverheatIssues', this.value === 'Yes')">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <div id="elecOverheatIssues" class="inline-conditional">
+          <div class="upload-zone">
+            <span class="upload-label">Upload Evidence</span>
+            <input type="file" id="fileOverheat" accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Consumer Unit / DB Details -->
+    <div id="step-5" class="step-panel" data-step-name="CU Details">
+      <div class="row-2">
+        <div class="field-group">
+          <label>Number of Boards</label>
+          <select id="cuCount">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3+">3+</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Enclosure Type</label>
+          <select id="cuMaterial">
+            <option value="Metal">Metal</option>
+            <option value="Plastic">Plastic</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Protection Type</label>
+        <select id="cuProtection" onchange="toggleInline('cuNoRcdAlert', this.value === 'No RCD')">
+          <option value="RCBOs throughout">RCBOs (Individual)</option>
+          <option value="Split-load RCD">Split-load Dual RCD</option>
+          <option value="No RCD">No RCD / Rewirable</option>
+          <option value="Unknown">Unknown</option>
+        </select>
+        <div id="cuNoRcdAlert" class="inline-conditional">
+           <label style="color:#e53e3e;">Priority upgrade required?</label>
+           <select id="cuPriorityUpgrade">
+             <option value="No">No</option>
+             <option value="Yes">Yes</option>
+           </select>
+        </div>
+      </div>
+
+      <div class="row-2">
+         <div class="field-group">
+           <label>SPD Present?</label>
+           <select id="cuSPD">
+             <option value="No">No</option>
+             <option value="Yes">Yes</option>
+             <option value="Unknown">Unknown</option>
+           </select>
+         </div>
+         <div class="field-group">
+           <label>AFDD Present?</label>
+           <select id="cuAFDD">
+             <option value="No">No</option>
+             <option value="Yes">Yes</option>
+             <option value="Unknown">Unknown</option>
+           </select>
+         </div>
+      </div>
+      
+      <div class="field-group">
+        <label>Spare Ways Available?</label>
+        <select id="cuSpares">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+          <option value="Unknown">Unknown</option>
+        </select>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: Rewire Scope (Conditional) -->
+    <div id="step-6" class="step-panel" data-step-name="Rewire Scope">
+      <div class="field-group">
+         <label>Rewire Type</label>
+         <select id="rewireType">
+           <option value="Full">Full Rewire</option>
+           <option value="Partial">Partial Rewire</option>
+           <option value="CU only">CU Upgrade Only</option>
+           <option value="Unknown">Unknown</option>
+         </select>
+      </div>
+
+      <div class="row-2">
+        <div class="field-group">
+          <label>Bedrooms</label>
+          <input type="number" id="rwBeds" placeholder="Qty">
+        </div>
+        <div class="field-group">
+          <label>Bathrooms</label>
+          <input type="number" id="rwBaths" placeholder="Qty">
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field-group">
+          <label>Receptions</label>
+          <input type="number" id="rwReceptions" placeholder="Qty">
+        </div>
+        <div class="field-group">
+          <label>Kitchen Re-do?</label>
+          <select id="rwKitchen">
+             <option value="No">No</option>
+             <option value="Yes">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Special Circuits Needed</label>
+        <div class="reason-grid">
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">Electric Shower</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">Cooker/Hob</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">EV Charger</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">Heat Pump</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">Hot Tub</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">Outbuilding</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'rwSpecials')">Home Office</div>
+        </div>
+        <input type="hidden" id="rwSpecials">
+      </div>
+
+      <div class="field-group">
+        <label>Finish Level</label>
+        <select id="rwFinish">
+          <option value="Standard white">Standard White Plastic</option>
+          <option value="Premium plates">Premium / Flat plate</option>
+          <option value="Brushed metal">Brushed Metal / Chrome</option>
+          <option value="Client supplying">Client Supplying</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Chasing Status</label>
+        <select id="rwChasing" onchange="toggleInline('rwSurfaceWrapper', this.value === 'No')">
+          <option value="Yes">Chasing Allowed</option>
+          <option value="No">No Chasing</option>
+        </select>
+        <div id="rwSurfaceWrapper" class="inline-conditional">
+          <label>Is surface containment acceptable?</label>
+          <select id="rwSurfaceAccept">
+            <option value="No">No</option>
+            <option value="Yes">Yes (Trunking/Conduit)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Lighting Design (Conditional) -->
+    <div id="step-7" class="step-panel" data-step-name="Lighting">
+      <div class="field-group">
+        <label>Approach</label>
+        <select id="lightApproach">
+           <option value="Like-for-like">Like-for-like replacement</option>
+           <option value="Redesign">Total Redesign</option>
+           <option value="Mix">Mix of both</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Downlights</label>
+        <select id="lightDownlights">
+           <option value="None">None</option>
+           <option value="Some rooms">Some rooms</option>
+           <option value="Whole house">Whole house</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Smart Lighting?</label>
+        <select id="lightSmart" onchange="toggleInline('lightSmartSys', this.value === 'Yes')">
+           <option value="No">No</option>
+           <option value="Maybe">Maybe</option>
+           <option value="Yes">Yes</option>
+        </select>
+        <div id="lightSmartSys" class="inline-conditional">
+          <label>System preference:</label>
+          <input type="text" id="lightSmartSystem" placeholder="e.g. Lutron, Hue, Rako">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>External Lighting?</label>
+        <select id="lightExternal" onchange="toggleInline('lightExtDetails', this.value === 'Yes')">
+           <option value="No">No</option>
+           <option value="Yes">Yes</option>
+        </select>
+        <div id="lightExtDetails" class="inline-conditional">
+          <label>Areas:</label>
+          <textarea id="lightExternalAreas" rows="2" placeholder="Garden, Driveway, Porch..."></textarea>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 8: Evidence & Access -->
+    <div id="step-8" class="step-panel" data-step-name="Evidence">
+      <div class="field-group">
+        <label>Standard Photo Uploads</label>
+        <div class="upload-zone">
+           <span class="upload-label">Intake / Meter</span>
+           <input type="file" id="photoIntake" multiple accept="image/*">
+        </div>
+        <div class="upload-zone">
+           <span class="upload-label">Consumer Unit(s)</span>
+           <input type="file" id="photoCU" multiple accept="image/*">
+        </div>
+        <div class="upload-zone">
+           <span class="upload-label">General / Routes</span>
+           <input type="file" id="photoGeneral" multiple accept="image/*">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Access Notes</label>
+        <textarea id="accessNotes" rows="2" placeholder="Keys, parking, pets, alarm codes?"></textarea>
+      </div>
+
+      <div class="field-group">
+        <label>Client Priorities</label>
+        <div class="reason-grid">
+           <div class="reason-chip" onclick="toggleSelection(this, 'accessPriorities')">Minimal Disruption</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'accessPriorities')">Best Finish</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'accessPriorities')">Speed</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'accessPriorities')">Future-proofing</div>
+           <div class="reason-chip" onclick="toggleSelection(this, 'accessPriorities')">Budget Cap</div>
+        </div>
+        <input type="hidden" id="accessPriorities">
+      </div>
+      
+      <div class="field-group">
+         <label>Budget Cap (Optional)</label>
+         <input type="text" id="budgetCap" placeholder="£">
+      </div>
+
+      <div class="field-group">
+        <label>Ready for Quote Today?</label>
+        <select id="quoteReady" onchange="toggleInline('quoteDetails', this.value === 'Yes')">
+           <option value="No">No - Information Gathering</option>
+           <option value="Yes">Yes</option>
+        </select>
+        <div id="quoteDetails" class="inline-conditional">
+           <div class="field-group">
+             <label>Preferred Start:</label>
+             <input type="text" id="startWindow" placeholder="e.g. ASAP, or Next Month">
+           </div>
+           <div class="field-group">
+             <label>Decision Makers Present?</label>
+             <select id="decisionMakers">
+               <option value="Yes">Yes</option>
+               <option value="No">No</option>
+             </select>
+           </div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-next" onclick="nextStep()">Review &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 9: Final Review -->
+    <div id="step-9" class="step-panel" data-step-name="Review">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h3 style="color:var(--orange);">Review Submission</h3>
+        <p style="font-size:0.85rem; color:rgba(255,255,255,0.6);">Summary of captured data</p>
+      </div>
+      
+      <div id="reviewContainer" class="review-grid">
+        <!-- JS Populated -->
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-prev" onclick="prevStep()">&larr; Back</button>
+        <button class="btn-submit" onclick="submitForm()">Submit Survey</button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- ============================================================
+       ELITE CONNECTOR FOOTER
+  ============================================================ -->
+  <footer class="ec-footer">
+    <a href="https://eliteconnector.co.uk/" target="_blank" rel="noopener noreferrer">
+      <img
+        src="https://msgsndr-private.storage.googleapis.com/companyPhotos/cfbf05c1-be22-4cb3-b53c-1eaf24f986fb.png"
+        alt="Elite Connector Ltd"
+        loading="eager"
+        decoding="async"
+        onerror="this.style.display='none';document.querySelector('.ec-logo-fallback-text').style.display='inline-block';"
+      />
+      <span class="ec-logo-fallback-text">Elite Connector Ltd</span>
+    </a>
+    <p class="powered-by-text">Powered by Elite Connector Ltd</p>
+  </footer>
+
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+  let currentStepIndex = 0;
+  let stepSequence = [];
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    // Flatpickr
+    flatpickr("#surveyDate", { 
+       dateFormat: "Y-m-d", 
+       defaultDate: new Date(),
+       disableMobile: "true" 
+    });
+
+    // Custom Radio logic for Property Type
+    const radioCards = document.querySelectorAll('.radio-card');
+    radioCards.forEach(card => {
+      card.addEventListener('click', () => {
+        // Deselect all
+        document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('checked'));
+        // Select clicked
+        card.classList.add('checked');
+        const radio = card.querySelector('input[type="radio"]');
+        if(radio) {
+           radio.checked = true;
+           // Trigger logic automatically if it's the property selector
+           if(radio.name === 'propType') {
+             // We could auto-advance here if desired, but let's stick to "Next" button for clarity
+           }
+        }
+      });
+    });
+
+    // Compute initial sequence
+    computeStepSequence();
+  });
+
+  // --- Logic for Steps --- 
+  
+  function computeStepSequence() {
+     // Always start with 1 (Basics) and 2 (Property Type)
+     const newSeq = ['step-1', 'step-2'];
+
+     // Determine Prop Type
+     const propType = getRadioValue('propType');
+     
+     // Branch A: Flat
+     if (propType === 'Flat-apartment') {
+       newSeq.push('step-3a');
+     } 
+     // Branch B: Houses
+     else if (['Terrace (mid)', 'Terrace (end)', 'Semi-detached', 'Detached', 'Bungalow'].includes(propType)) {
+       newSeq.push('step-3b');
+     }
+     // Branch C: HMO
+     else if (propType === 'HMO-multi-let') {
+       newSeq.push('step-3c');
+     }
+     // Branch D: Commercial
+     else if (propType === 'Commercial unit') {
+       newSeq.push('step-3d');
+     }
+     // Default fall-through if "Other" or unset, we might skip step 3 entirely or define a generic one. 
+     // For now, if unset, we simply won't add a step 3. 
+
+     // Always Step 4 (Intake) & 5 (CU)
+     newSeq.push('step-4');
+     newSeq.push('step-5');
+
+     // Conditional Step 6: Rewire
+     const reasons = document.getElementById('surveyReasons').value || '';
+     if (reasons.includes('Rewire quote')) {
+       newSeq.push('step-6');
+     }
+
+     // Conditional Step 7: Lighting
+     if (reasons.includes('Lighting redesign')) {
+       newSeq.push('step-7');
+     }
+
+     // Always Step 8 (Evidence) & 9 (Review)
+     newSeq.push('step-8', 'step-9');
+
+     stepSequence = newSeq;
+     updateProgressBar();
+  }
+
+  // Navigation
+  function nextStep() {
+    // 1. Recalculate sequence in case inputs changed (like Prop Type or Reasons)
+    // Note: We only really need to re-calc if we are on Step 1 (Reasons) or Step 2 (Prop Type)
+    const currentId = stepSequence[currentStepIndex];
+    if (currentId === 'step-1' || currentId === 'step-2') {
+      computeStepSequence();
+    }
+
+    if (!validateStep(currentId)) return;
+
+    if (currentStepIndex < stepSequence.length - 1) {
+      // Hide current
+      document.getElementById(stepSequence[currentStepIndex]).classList.remove('active');
+      
+      currentStepIndex++;
+      
+      // Show next
+      const nextId = stepSequence[currentStepIndex];
+      const nextPanel = document.getElementById(nextId);
+      nextPanel.classList.add('active');
+
+      // Scroll top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateProgressBar();
+
+      // If Review step, build it
+      if (nextId === 'step-9') {
+        buildReview();
+      }
+    }
+  }
+
+  function prevStep() {
+    if (currentStepIndex > 0) {
+      document.getElementById(stepSequence[currentStepIndex]).classList.remove('active');
+      currentStepIndex--;
+      document.getElementById(stepSequence[currentStepIndex]).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateProgressBar();
+    }
+  }
+
+  // --- UI Helpers ---
+
+  function updateProgressBar() {
+    // Update numerical indicator
+    const total = stepSequence.length;
+    const current = currentStepIndex + 1;
+    document.querySelector('.step-counter .current').textContent = `Step ${current}`;
+    document.querySelector('.step-counter .total').textContent = `of ${total}`;
+    
+    // Update step name text
+    const curId = stepSequence[currentStepIndex];
+    const panel = document.getElementById(curId);
+    if(panel) {
+      document.querySelector('.step-counter .step-name').textContent = panel.getAttribute('data-step-name');
+    }
+
+    // Visual Dots: We have 5 placeholder dots in HTML. 
+    // If the sequence is significantly longer (max could be ~7-8), we map proportionally or clamp.
+    // For simplicity, let's treat the dots as a rough % progress bar
+    
+    const fillPercent = ((currentStepIndex) / (total - 1)) * 100;
+    const lines = document.querySelectorAll('.step-line .fill');
+    
+    // Simple logic: fill all lines up to current approximate progress
+    // This is a "fake" visual to keep the UI fixed-width. 
+    // A more complex implementation would dynamically regenerate dots.
+    lines.forEach(l => l.style.width = `${fillPercent}%`);
+    
+    document.querySelectorAll('.step-dot').forEach((dot, idx) => {
+       // Rough mapping: 5 dots => 0%, 25%, 50%, 75%, 100%
+       const dotPos = (idx / 4) * 100; // 0, 25, 50, 75, 100
+       if (fillPercent >= dotPos) {
+         dot.classList.add('active');
+         if (fillPercent > dotPos) dot.classList.add('done');
+       } else {
+         dot.classList.remove('active', 'done');
+       }
+    });
+
+    // Text labels
+    const labels = document.querySelectorAll('.step-label');
+    labels.forEach((lbl, i) => {
+      lbl.classList.remove('active', 'done');
+      if (i === Math.floor((currentStepIndex / (total-1)) * (labels.length-1))) {
+        lbl.classList.add('active');
+      } else if (i < (currentStepIndex / (total-1)) * (labels.length-1)) {
+        lbl.classList.add('done');
+      }
+    });
+  }
+
+  function validateStep(stepId) {
+    const panel = document.getElementById(stepId);
+    const required = panel.querySelectorAll('[required]');
+    let valid = true;
+
+    // Default required check
+    required.forEach(field => {
+       if (!field.value.trim()) {
+         field.classList.add('error');
+         valid = false;
+       } else {
+         field.classList.remove('error');
+       }
+    });
+
+    // Special Check Step 1: Reason
+    if (stepId === 'step-1') {
+      if (!document.getElementById('surveyReasons').value) {
+        document.getElementById('reasonGrid').style.border = "1px solid #e53e3e";
+        valid = false;
+      } else {
+        document.getElementById('reasonGrid').style.border = "none";
+      }
+    }
+
+    // Special Check Step 2: Prop Type
+    if (stepId === 'step-2') {
+       if (!getRadioValue('propType')) {
+         valid = false;
+         alert("Please select a property type.");
+       }
+    }
+
+    return valid;
+  }
+
+  function toggleReason(chip, value) {
+     chip.classList.toggle('selected');
+     const input = document.getElementById('surveyReasons');
+     let currentVals = input.value ? input.value.split(',') : [];
+     
+     if (chip.classList.contains('selected')) {
+       currentVals.push(value);
+     } else {
+       currentVals = currentVals.filter(v => v !== value);
+     }
+     input.value = currentVals.join(',');
+     
+     // Trigger re-calc if needed
+     computeStepSequence();
+  }
+
+  function toggleSelection(chip, hiddenInputId) {
+     chip.classList.toggle('selected');
+     const input = document.getElementById(hiddenInputId);
+     const val = chip.textContent.trim();
+     let currentVals = input.value ? input.value.split(',') : [];
+     
+     if (chip.classList.contains('selected')) {
+       currentVals.push(val);
+     } else {
+       currentVals = currentVals.filter(v => v !== val);
+     }
+     input.value = currentVals.join(',');
+  }
+
+  function toggleInline(elementId, show) {
+    const el = document.getElementById(elementId);
+    if(el) {
+      if(show) el.classList.add('visible');
+      else el.classList.remove('visible');
+    }
+  }
+
+  function getRadioValue(name) {
+    const r = document.querySelector(`input[name="${name}"]:checked`);
+    return r ? r.value : null;
+  }
+
+  function getValue(id) {
+    const el = document.getElementById(id);
+    return el ? el.value : '';
+  }
+
+  // --- Review & Submit ---
+
+  function buildReview() {
+    const container = document.getElementById('reviewContainer');
+    container.innerHTML = '';
+
+    const reviewData = [];
+
+    // Basics
+    reviewData.push({ label: 'Client', val: getValue('clientName') });
+    reviewData.push({ label: 'Address', val: getValue('siteAddress') });
+    reviewData.push({ label: 'Survey Reasons', val: getValue('surveyReasons') });
+    
+    // Property
+    reviewData.push({ label: 'Property Type', val: getRadioValue('propType') });
+    
+    // Dynamic Section Data extraction
+    // We could iterate all visible inputs, but manual key selection is cleaner
+    if (stepSequence.includes('step-3c')) { // HMO
+      reviewData.push({ label: 'HMO Rooms', val: getValue('hmoRooms') });
+      reviewData.push({ label: 'Fire Alarm', val: getValue('hmoFire') });
+    }
+    if (stepSequence.includes('step-3d')) { // Commercial
+      reviewData.push({ label: 'Business Type', val: getValue('commType') });
+      reviewData.push({ label: 'Supply', val: getValue('comm3Phase') });
+    }
+    
+    // Electrical
+    reviewData.push({ label: 'Earthing', val: getValue('elecEarthing') });
+    reviewData.push({ label: 'Bonding', val: getValue('elecBonding') });
+    reviewData.push({ label: 'CU Boards', val: getValue('cuCount') });
+    reviewData.push({ label: 'CU Protection', val: getValue('cuProtection') });
+
+    if (stepSequence.includes('step-6')) { // Rewire
+      reviewData.push({ label: 'Rewire Scope', val: getValue('rewireType') });
+      reviewData.push({ label: 'Finish', val: getValue('rwFinish') });
+    }
+
+    reviewData.forEach(item => {
+       if(item.val && item.val !== 'Unknown' && item.val !== '') {
+          const div = document.createElement('div');
+          div.className = 'review-item';
+          div.innerHTML = `<div class="review-label">${item.label}</div><div class="review-val">${item.val}</div>`;
+          container.appendChild(div);
+       }
+    });
+  }
+
+  function submitForm() {
+    const btn = document.querySelector('.btn-submit');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    // Collect all data
+    const formData = {};
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+       if (el.id) {
+         if (el.type === 'radio') {
+           if (el.checked) formData[el.name] = el.value;
+         } else if (el.type === 'file') {
+           // Skip files for JSON payload, typically handled via FormData if multi-part, 
+           // here we just note existing count
+           if(el.files.length > 0) formData[el.id] = `${el.files.length} file(s)`;
+         } else {
+           formData[el.id] = el.value;
+         }
+       }
+    });
+
+    // Specifically ensure propType is captured
+    formData['propType'] = getRadioValue('propType');
+
+    // Post to GHL
+    fetch('https://services.leadconnectorhq.com/hooks/BINHN67zcmmPlBACGLVK/webhook-trigger/532880a0-4c59-4e84-a64b-0cf9adfe590a', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+    .then(response => {
+       if(response.ok) {
+         document.querySelector('.form-shell').innerHTML = `
+           <div style="padding:40px; text-align:center;">
+             <h2 style="color:var(--orange);">Survey Submitted</h2>
+             <p style="color:#aaa; margin-top:10px;">Data has been sent to the office.</p>
+             <button onclick="location.reload()" style="margin-top:20px; background:var(--navy2); color:#fff; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">New Survey</button>
+           </div>
+         `;
+       } else {
+         throw new Error('Network response was not ok');
+       }
+    })
+    .catch(error => {
+       console.error('Error:', error);
+       btn.textContent = 'Error - Try Again';
+       btn.disabled = false;
+       alert("Submission failed. Please check connection.");
+    });
+  }
+</script>
+
+</body>
+</html>
